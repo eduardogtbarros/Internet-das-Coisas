@@ -1,0 +1,565 @@
+[
+    {
+        "id": "a1b2c3d4e5f6",
+        "type": "tab",
+        "label": "Prática 10",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "mqtt_in_temp",
+        "type": "mqtt in",
+        "z": "a1b2c3d4e5f6",
+        "name": "Temperatura",
+        "topic": "sensor/temperatura",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 310,
+        "y": 60,
+        "wires": [
+            [
+                "switch_alarm_temp",
+                "538cc788d98babe5",
+                "convert_temp"
+            ]
+        ]
+    },
+    {
+        "id": "chart_temp",
+        "type": "ui_chart",
+        "z": "a1b2c3d4e5f6",
+        "name": "Temperatura",
+        "group": "e1d54d097bd96286",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Temperatura",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm",
+        "interpolate": "linear",
+        "nodata": "Nenhum dado",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": "",
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#ff7f0e",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 830,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "switch_alarm_temp",
+        "type": "switch",
+        "z": "a1b2c3d4e5f6",
+        "name": "Verificar Alarme",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "limiteTemp",
+                "vt": "flow"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 600,
+        "y": 140,
+        "wires": [
+            [
+                "change_alarm_on"
+            ]
+        ]
+    },
+    {
+        "id": "change_alarm_on",
+        "type": "change",
+        "z": "a1b2c3d4e5f6",
+        "name": "Alarme ON",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 810,
+        "y": 140,
+        "wires": [
+            [
+                "mqtt_out_alarm",
+                "telegram_sender"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_out_alarm",
+        "type": "mqtt out",
+        "z": "a1b2c3d4e5f6",
+        "name": "Enviar Alarme",
+        "topic": "comando/alarme",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker",
+        "x": 1010,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "telegram_sender",
+        "type": "telegram sender",
+        "z": "a1b2c3d4e5f6",
+        "name": "Enviar Telegram",
+        "bot": "4e8b9365c63688dd",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1000,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "538cc788d98babe5",
+        "type": "function",
+        "z": "a1b2c3d4e5f6",
+        "name": "smooth",
+        "func": "let values = context.get('values') || [];\nlet total = context.get('total') || 0;\n\n// Adicionar novo valor\nlet newValue = parseFloat(msg.payload);\nvalues.push(newValue);\ntotal += newValue;\n\n// Manter apenas os últimos 7 valores\nif (values.length > 7) {\n    let removed = values.shift();\n    total -= removed;\n}\n\n// Calcular média\nlet average = total / values.length;\n\n// Atualizar contexto\ncontext.set('values', values);\ncontext.set('total', total);\n\n// Definir a média como a nova carga útil\nmsg.payload = average;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 100,
+        "wires": [
+            [
+                "chart_temp"
+            ]
+        ]
+    },
+    {
+        "id": "1234abcd5678",
+        "type": "mqtt in",
+        "z": "a1b2c3d4e5f6",
+        "name": "Receber Umidade",
+        "topic": "sensor/umidade",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 270,
+        "y": 340,
+        "wires": [
+            [
+                "convert_umidade"
+            ]
+        ]
+    },
+    {
+        "id": "ui-gauge",
+        "type": "ui_gauge",
+        "z": "a1b2c3d4e5f6",
+        "name": "Umidade Gauge",
+        "group": "e1d54d097bd96286",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Umidade",
+        "label": "{{msg.payload.unidade}}",
+        "format": "{{msg.payload.valor}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 780,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "check-limite",
+        "type": "switch",
+        "z": "a1b2c3d4e5f6",
+        "name": "Verificar Limite",
+        "property": "payload.valor",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "flow.limiteUmidade",
+                "vt": "flow"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 570,
+        "y": 420,
+        "wires": [
+            [
+                "alert-alarm"
+            ]
+        ]
+    },
+    {
+        "id": "alert-alarm",
+        "type": "change",
+        "z": "a1b2c3d4e5f6",
+        "name": "Acionar Alarme",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "ON",
+                "tot": "str"
+            }
+        ],
+        "x": 770,
+        "y": 420,
+        "wires": [
+            [
+                "mqtt-out-alarm",
+                "telegram-send"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt-out-alarm",
+        "type": "mqtt out",
+        "z": "a1b2c3d4e5f6",
+        "name": "Publicar Alarme",
+        "topic": "comando/alarme",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker",
+        "x": 990,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "telegram-send",
+        "type": "telegram sender",
+        "z": "a1b2c3d4e5f6",
+        "name": "Enviar Telegram",
+        "bot": "4e8b9365c63688dd",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 990,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1a06356c45f246b8",
+        "type": "aedes broker",
+        "z": "a1b2c3d4e5f6",
+        "name": "",
+        "mqtt_port": "1884",
+        "mqtt_ws_bind": "port",
+        "mqtt_ws_port": "",
+        "mqtt_ws_path": "",
+        "cert": "",
+        "key": "",
+        "certname": "",
+        "keyname": "",
+        "persistence_bind": "memory",
+        "dburl": "",
+        "usetls": false,
+        "x": 90,
+        "y": 260,
+        "wires": [
+            [],
+            []
+        ],
+        "outputLabels": [
+            "controle",
+            "sensor"
+        ]
+    },
+    {
+        "id": "mqtt-in-fotoresistor",
+        "type": "mqtt in",
+        "z": "a1b2c3d4e5f6",
+        "name": "Fotoresistor",
+        "topic": "sensor/fotoresistor",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 250,
+        "y": 520,
+        "wires": [
+            [
+                "fotoresistor_function",
+                "fotoresistor_text"
+            ]
+        ]
+    },
+    {
+        "id": "button_toggle",
+        "type": "ui_button",
+        "z": "a1b2c3d4e5f6",
+        "name": "Alternar Unidade",
+        "group": "e1d54d097bd96286",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Alternar Unidade",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "toggle",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 290,
+        "y": 120,
+        "wires": [
+            [
+                "convert_temp"
+            ]
+        ]
+    },
+    {
+        "id": "convert_temp",
+        "type": "function",
+        "z": "a1b2c3d4e5f6",
+        "name": "Converter Unidade",
+        "func": "// Obtém a unidade atual do fluxo, padrão é '°C'\nlet unidade = flow.get('unidadeTemp') || '°C';\n\n// Alterna entre °C e °F se o botão foi clicado\nif (msg.payload === 'toggle') {\n    unidade = (unidade === '°C') ? '°F' : '°C';\n    flow.set('unidadeTemp', unidade);\n    return null; // Não processa dados, apenas alterna a unidade\n}\n\n// Converte a temperatura\nlet tempC = parseFloat(msg.payload); // Entrada original em °C\nlet tempF = (tempC * 9/5) + 32;\nmsg.payload = (unidade === '°C') ? tempC : tempF;\n\n// Adiciona a unidade ao valor\nmsg.label = `${msg.payload.toFixed(2)} ${unidade}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 60,
+        "wires": [
+            [
+                "chart_temp"
+            ]
+        ]
+    },
+    {
+        "id": "959e591d72f9eb1d",
+        "type": "ui_button",
+        "z": "a1b2c3d4e5f6",
+        "name": "Alternar Unidade",
+        "group": "e1d54d097bd96286",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Alternar Unidade",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "toggle",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 270,
+        "y": 420,
+        "wires": [
+            [
+                "convert_umidade"
+            ]
+        ]
+    },
+    {
+        "id": "convert_umidade",
+        "type": "function",
+        "z": "a1b2c3d4e5f6",
+        "name": "Converter Unidade",
+        "func": "// Obtém a unidade atual do fluxo, padrão é '%RH'\nlet unidade = flow.get('unidadeUmidade') || '%RH';\n\n// Alterna a unidade se o botão foi clicado\nif (msg.payload === 'toggle') {\n    if (unidade === '%RH') unidade = 'kg/m³';\n    else if (unidade === 'kg/m³') unidade = 'lb/ft³';\n    else unidade = '%RH';\n    flow.set('unidadeUmidade', unidade);\n    return null; // Não processa dados, apenas alterna a unidade\n}\n\n// Conversão da umidade\nlet umidadeRelativa = parseFloat(msg.payload); // Entrada padrão em %RH\nlet densidadeKgM3 = umidadeRelativa * 0.013; // Fator de conversão fictício\nlet densidadeLbFt3 = densidadeKgM3 * 0.062428;\n\nif (unidade === '%RH') {\n    msg.payload = { valor: umidadeRelativa.toFixed(2), unidade: unidade};\n    msg.label = `${msg.payload} %RH`;\n} else if (unidade === 'kg/m³') {\n    msg.payload = { valor: densidadeKgM3.toFixed(3), unidade: unidade};\n    msg.label = `${msg.payload} kg/m³`;\n} else if (unidade === 'lb/ft³') {\n    msg.payload = {valor: densidadeLbFt3.toFixed(3), unidade: unidade};\n    msg.label = `${msg.payload} lb/ft³`;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 320,
+        "wires": [
+            [
+                "check-limite",
+                "ui-gauge"
+            ]
+        ]
+    },
+    {
+        "id": "fotoresistor_function",
+        "type": "function",
+        "z": "a1b2c3d4e5f6",
+        "name": "Determinar Estado",
+        "func": "// // Obtém o valor do fotoresistor\n// let valor = parseInt(msg.payload);\n\n// // Define um limiar para o estado (ajustar conforme necessário)\n// let limiar = 500; // Valor de referência para determinar claro/escuro\n\n// // Define o estado com base no valor\n// if (valor >= limiar) {\n//     msg.estado = \"Claro\";\n// } else {\n//     msg.estado = \"Escuro\";\n// }\n\n// // Retorna o valor original e o estado\n// msg.payload = valor; // Mantém o valor original para o gráfico\nmsg.label = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fotoresistor_text",
+        "type": "ui_text",
+        "z": "a1b2c3d4e5f6",
+        "group": "e1d54d097bd96286",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "Estado do Fotoresistor",
+        "label": "Estado Atual:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 760,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "Aedes Broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "e1d54d097bd96286",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "a95b1ea1ec2e44aa",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "4e8b9365c63688dd",
+        "type": "telegram bot",
+        "botname": "pratica10",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "addressfamily": "",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": "6667",
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "a95b1ea1ec2e44aa",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
